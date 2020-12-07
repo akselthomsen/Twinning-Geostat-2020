@@ -23,8 +23,8 @@ x <- tibble::tibble(
 ) %>%
   mutate(
     employed = if_else(age < 70,
-                       sample(x = 0:1, size = N, replace = TRUE, prob = c(0.8,0.2)),
-                       sample(x = 0:1, size = N, replace = TRUE, prob = c(0.1,0.9))),
+                       sample(x = 0:1, size = N, replace = TRUE, prob = c(0.2,0.8)),
+                       sample(x = 0:1, size = N, replace = TRUE, prob = c(0.9,0.1))),
     hours = if_else(employed == 1,
                     sample(x = 20:40, size = N, replace = TRUE, prob = c(rep(0.3/20,20),0.7)),
                     NA_integer_)
