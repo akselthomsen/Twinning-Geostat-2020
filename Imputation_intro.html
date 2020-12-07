@@ -20,26 +20,115 @@ class: center, middle, inverse, title-slide
 ---
 
 
+
+
 # Outline
 
-1. Imputation in general
-1. Donor-based imputation methods
-1. How to in `R`
+1. Theory
+
+  1. Imputation in general
+  1. Donor-based imputation methods
+  
+1. In practice
+
+  1. Analyze
+  1. Methods
+  1. How to in `R`
 
 ---
 class: inverse, center, middle
 
-# Imputation
+# Theory
 
 ---
 class: inverse, center, middle
 
-# Donor imputation
+# In practice
 
 ---
-class: inverse, center, middle
 
-# How to in R
+# Simulated LFS
+
+
+```r
+library(tidyverse)
+lfs &lt;- read_csv("example.csv", col_types = "inffnn")
+
+head(lfs)
+```
+
+```
+## # A tibble: 6 x 6
+##      id   age gender region employed hours
+##   &lt;int&gt; &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1     1    64 F      W             1    40
+## 2     2    77 M      S             0    NA
+## 3     3    83 F      S            NA    NA
+## 4     4    24 F      W             1    40
+## 5     5    65 F      N             1    40
+## 6     6    42 M      E             0    NA
+```
+
+---
+
+
+```r
+summary(lfs)
+```
+
+```
+##        id             age        gender  region     employed     
+##  Min.   :  1.0   Min.   :18.00   F:259   W:164   Min.   :0.0000  
+##  1st Qu.:125.8   1st Qu.:34.00   M:241   S:132   1st Qu.:0.0000  
+##  Median :250.5   Median :47.00           N: 81   Median :1.0000  
+##  Mean   :250.5   Mean   :49.55           E:123   Mean   :0.6526  
+##  3rd Qu.:375.2   3rd Qu.:65.00                   3rd Qu.:1.0000  
+##  Max.   :500.0   Max.   :90.00                   Max.   :1.0000  
+##                                                  NA's   :51      
+##      hours      
+##  Min.   :20.00  
+##  1st Qu.:39.00  
+##  Median :40.00  
+##  Mean   :37.24  
+##  3rd Qu.:40.00  
+##  Max.   :40.00  
+##  NA's   :207
+```
+
+--
+
+## Partial non-response!
+
+--- 
+# a
+
+
+```r
+lfs %&gt;% count(employed, is.na(hours))
+```
+
+```
+## # A tibble: 5 x 3
+##   employed `is.na(hours)`     n
+##      &lt;dbl&gt; &lt;lgl&gt;          &lt;int&gt;
+## 1        0 TRUE             156
+## 2        1 FALSE            265
+## 3        1 TRUE              28
+## 4       NA FALSE             28
+## 5       NA TRUE              23
+```
+
+--
+
+## Routing: employed = 0 =&gt; hours not asked
+
+--
+
+## Logical imputation: hours answered =&gt; the person is employed
+
+---
+
+a
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

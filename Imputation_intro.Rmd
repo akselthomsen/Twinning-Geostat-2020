@@ -13,23 +13,68 @@ output:
       countIncrementalSlides: false
 ---
 
+```{r, setup, include=FALSE}
+```
+
 # Outline
 
-1. Imputation in general
-1. Donor-based imputation methods
-1. How to in `R`
+1. Theory
+
+  1. Imputation in general
+  1. Donor-based imputation methods
+  
+1. In practice
+
+  1. Analyze
+  1. Methods
+  1. How to in `R`
 
 ---
 class: inverse, center, middle
 
-# Imputation
+# Theory
 
 ---
 class: inverse, center, middle
 
-# Donor imputation
+# In practice
 
 ---
-class: inverse, center, middle
 
-# How to in R
+# Simulated LFS
+
+```{r, message=FALSE}
+library(tidyverse)
+lfs <- read_csv("example.csv", col_types = "inffnn")
+
+head(lfs)
+```
+
+---
+
+```{r}
+summary(lfs)
+```
+
+--
+
+## Partial non-response!
+
+--- 
+# a
+
+```{r}
+lfs %>% count(employed, is.na(hours))
+```
+
+--
+
+## Routing: employed = 0 => hours not asked
+
+--
+
+## Logical imputation: hours answered => the person is employed
+
+---
+
+a
