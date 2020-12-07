@@ -1,0 +1,35 @@
+---
+title: "Doner based imputation methods"
+subtitle: "with apllications in R"
+author: "Aksel Thomsen (akt@dst.dk)"
+institute: "Statistics Denmark"
+date: "2020/12/7"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+# Outline
+
+1. Imputation in general
+1. Donor-based imputation methods
+1. How to in `R`
+
+---
+class: inverse, center, middle
+
+# Imputation
+
+---
+class: inverse, center, middle
+
+# Donor imputation
+
+---
+class: inverse, center, middle
+
+# How to in R
