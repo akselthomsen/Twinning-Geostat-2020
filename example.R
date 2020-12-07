@@ -27,7 +27,7 @@ x <- tibble::tibble(
                        sample(x = 0:1, size = N, replace = TRUE, prob = c(0.1,0.9))),
     hours = if_else(employed == 1,
                     sample(x = 20:40, size = N, replace = TRUE, prob = c(rep(0.3/20,20),0.7)),
-                    0L)
+                    NA_integer_)
   )
 
 x[c("employed","hours")] <- missForest::prodNA(x[c("employed","hours")], noNA = 0.1)
