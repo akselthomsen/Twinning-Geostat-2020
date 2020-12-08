@@ -56,7 +56,6 @@ class: inverse, center, middle
 --
 
 - Deductive (logical) imputation
-  - Rule based
 
 ---
 
@@ -72,6 +71,30 @@ Two general approaches:
   - Predictive mean matching
 
 1. Random draws (stratified)
+
+---
+
+# Donor imputation
+
+When is a donor good enough?
+
+And can different donors be used for the same observations?
+
+--
+
+3 cases:
+
+1. Complete:
+  - All imputed variables complete for doner
+  - Same donor for all variables
+
+1. Univariate
+  - Variables are imputed one by one
+  - Seperate donors for each variable
+
+1. Multivariate
+  - Donor pool for each missingness value
+  - Same donor for all variables
 
 ---
 
@@ -391,16 +414,16 @@ lfs_imp %&gt;% anti_join(lfs, by = names(lfs_imp)) %&gt;% slice_sample(n=10)
 
 |  id| age|gender |region | employed| hours|
 |---:|---:|:------|:------|--------:|-----:|
-| 243|  57|M      |N      |        1|    40|
-| 118|  63|M      |N      |        1|    36|
-| 306|  51|F      |W      |        1|    40|
-| 131|  33|F      |E      |        1|    40|
-|  77|  27|F      |S      |        1|    40|
-|  16|  18|F      |W      |        1|    40|
-| 205|  78|M      |E      |        0|    NA|
-|  38|  50|M      |W      |        1|    40|
-|  14|  46|F      |S      |        1|    26|
-| 271|  66|F      |N      |        1|    40|
+| 402|  60|F      |N      |        1|    40|
+| 187|  49|M      |W      |        1|    40|
+| 166|  48|M      |E      |        1|    40|
+| 247|  32|F      |S      |        1|    40|
+| 153|  32|M      |W      |        1|    39|
+| 437|  41|M      |S      |        1|    40|
+|  82|  85|M      |N      |        1|    40|
+| 443|  43|M      |W      |        1|    40|
+| 112|  35|F      |W      |        1|    40|
+| 127|  38|M      |N      |        1|    40|
 
 ---
 
@@ -421,6 +444,7 @@ lfs_mf &lt;- lfs %&gt;%
 ##   missForest iteration 1 in progress...done!
 ##   missForest iteration 2 in progress...done!
 ##   missForest iteration 3 in progress...done!
+##   missForest iteration 4 in progress...done!
 ```
 
 ```r
@@ -433,7 +457,6 @@ lfs_mf %&gt;% count(employed, is.na(hours))
 |--------:|:------------|---:|
 |        0|TRUE         | 156|
 |        1|FALSE        | 344|
-
 ---
 class: inverse, center, middle
 
@@ -444,6 +467,8 @@ class: inverse, center, middle
 
 # Ressources
 
+Presentation: [GitHub](https://github.com/akselthomsen/Twinning-Geostat-2020)
+
 EU / MEMOBUST: [Handbook on imputation](https://ec.europa.eu/eurostat/cros/content/imputation_en)
 
 CRAN Task View: [Official Statistics &amp; Survey Methodology](https://cran.r-project.org/web/views/OfficialStatistics.html)
@@ -451,6 +476,8 @@ CRAN Task View: [Official Statistics &amp; Survey Methodology](https://cran.r-pr
 Mark van der loo: [simputation: Simple Imputation](https://CRAN.R-project.org/package=simputation)
 
 RStudio: [Tidyverse collection of R packages](https://www.tidyverse.org/)
+
+Awesome official statistics software: [GSBPM &amp; R packages](https://github.com/SNStatComp/awesome-official-statistics-software)
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
