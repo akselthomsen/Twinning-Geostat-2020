@@ -26,14 +26,13 @@ class: center, middle, inverse, title-slide
 
 1. Theory
 
-  1. Imputation in general
-  1. Donor-based imputation methods
+  - Imputation in general (recap)
+  - Donor-based imputation methods
   
-1. In practice
+1. Practical
 
-  1. Analyze
-  1. Methods
-  1. How to in `R`
+  - Apply methods
+  - How to in `R`
 
 ---
 class: inverse, center, middle
@@ -41,9 +40,89 @@ class: inverse, center, middle
 # Theory
 
 ---
+
+# General theory
+
+- Item or **partiel** non-response
+
+--
+
+- Donor vs model based
+
+- Stochastic or deterministic
+
+- Hot- or cold-deck
+
+--
+
+- Deductive (logical) imputation
+  - Rule based
+
+---
+
+# Donor imputation
+
+Two general approaches:
+
+1. Nearest neighbor
+
+  - KNN
+    - Distance in multidimensional space
+
+  - Predictive mean matching
+
+1. Random draws (stratified)
+
+---
+
+# KNN
+- Find the K nearest neighbors
+  - K = 1: Pure donor imputation
+  - K &gt; 1: "Average" of the donors
+
+![](knn.png)
+
+
+.footnote[Source: [medium.com](https://medium.com/machine-learning-researcher/k-nearest-neighbors-in-machine-learning-e794014abd2a)]
+---
+
+# Predictive mean matching
+
+- Mix between model and donor based imputation
+
+- Method:
+
+  1. Estimate a  model predicting the missing variable(s)
+  2. Form predictions for all observation
+  3. Donor is the observation with the closest predicted value
+  
+- From here a KNN with K = 1
+- A way to redefine a multidimensional problem into a one dimensional problem
+
+---
+
+# Example: Linear prediction (1/2)
+
+&lt;img src="Imputation_intro_files/figure-html/unnamed-chunk-1-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Example: Linear prediction (2/2)
+
+&lt;img src="Imputation_intro_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Random draws
+
+  - Sequential or **random**
+  
+  - **With** or without replacement or maximum donations per donor
+
+---
 class: inverse, center, middle
 
-# In practice
+# Practical
 
 ---
 
@@ -52,22 +131,22 @@ class: inverse, center, middle
 
 ```r
 library(tidyverse)
-lfs &lt;- read_csv("example.csv", col_types = "inffnn")
+lfs &lt;- read_csv("example.csv", col_types = "inffnn") %&gt;% 
+  as.data.frame()
 
 head(lfs)
 ```
 
-```
-## # A tibble: 6 x 6
-##      id   age gender region employed hours
-##   &lt;int&gt; &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;     &lt;dbl&gt; &lt;dbl&gt;
-## 1     1    64 F      W             1    40
-## 2     2    77 M      S             0    NA
-## 3     3    83 F      S            NA    NA
-## 4     4    24 F      W             1    40
-## 5     5    65 F      N             1    40
-## 6     6    42 M      E             0    NA
-```
+
+
+| id| age|gender |region | employed| hours|
+|--:|---:|:------|:------|--------:|-----:|
+|  1|  64|F      |W      |        1|    40|
+|  2|  77|M      |S      |        0|    NA|
+|  3|  83|F      |S      |       NA|    NA|
+|  4|  24|F      |W      |        1|    40|
+|  5|  65|F      |N      |        1|    40|
+|  6|  42|M      |E      |        0|    NA|
 
 ---
 
@@ -99,36 +178,279 @@ summary(lfs)
 
 ## Partial non-response!
 
---- 
-# a
+---
 
 
 ```r
 lfs %&gt;% count(employed, is.na(hours))
 ```
 
-```
-## # A tibble: 5 x 3
-##   employed `is.na(hours)`     n
-##      &lt;dbl&gt; &lt;lgl&gt;          &lt;int&gt;
-## 1        0 TRUE             156
-## 2        1 FALSE            265
-## 3        1 TRUE              28
-## 4       NA FALSE             28
-## 5       NA TRUE              23
-```
+
+
+| employed|is.na(hours) |   n|
+|--------:|:------------|---:|
+|        0|TRUE         | 156|
+|        1|FALSE        | 265|
+|        1|TRUE         |  28|
+|       NA|FALSE        |  28|
+|       NA|TRUE         |  23|
 
 --
 
-## Routing: employed = 0 =&gt; hours not asked
+## Routing: employed = 0 =&gt; hours not asked (NA is valid)
 
 --
 
 ## Logical imputation: hours answered =&gt; the person is employed
 
+--
+
+## 51 missing cells left
+
 ---
 
-a
+# Simputation
+
+- R package to make imputations easy, covers:
+- **Model based** (optionally add [non-]parametric random residual)
+  - linear regression
+  - robust linear regression
+  - ridge/elasticnet/lasso regression
+  - CART models (decision trees)
+  - Random forest
+- **Multivariate** imputation
+  - Imputation based on the expectation-maximization algorithm
+  - missForest (=iterative random forest imputation)
+- **Donor** imputation (including various donor pool specifications)
+  - k-nearest neigbour (based on gower's distance)
+  - sequential hotdeck (LOCF, NOCB)
+  - random hotdeck
+  - Predictive mean matching
+- **Other**
+  - (groupwise) median imputation (optional random residual)
+  - Proxy imputation: copy another variable or use a simple transformation to compute imputed values.
+  - Apply trained models for imputation purposes.
+
+---
+
+# Imputation strategy
+
+1. Deductive: If answered hours, then the person is employed.
+
+1. Two step donor imputation:
+
+  1. Employment: Predictive mean matching
+  
+  1. Hours: Random hot-deck donor
+
+---
+
+# Step 1
+
+
+```r
+library(simputation)
+
+lfs_imp &lt;- lfs %&gt;% 
+  impute_proxy(formula = employed ~ hours &gt; 0)
+```
+
+--
+
+
+```r
+lfs_imp %&gt;% count(employed, is.na(hours))
+```
+
+
+
+| employed|is.na(hours) |   n|
+|--------:|:------------|---:|
+|        0|TRUE         | 156|
+|        1|FALSE        | 293|
+|        1|TRUE         |  28|
+|       NA|TRUE         |  23|
+
+---
+
+# Step 2
+
+
+```r
+lfs_imp &lt;- lfs %&gt;% 
+  impute_proxy(formula = employed ~ hours &gt; 0) %&gt;% 
+  impute_pmm(formula = employed ~ age + gender + region)
+```
+
+--
+
+
+```r
+lfs_imp %&gt;% count(employed, is.na(hours))
+```
+
+
+
+| employed|is.na(hours) |   n|
+|--------:|:------------|---:|
+|        0|TRUE         | 165|
+|        1|FALSE        | 293|
+|        1|TRUE         |  42|
+
+---
+
+# Step 3
+
+
+```r
+lfs_imp &lt;- lfs %&gt;% 
+  impute_proxy(formula = employed ~ hours &gt; 0) %&gt;% 
+  impute_pmm(formula = employed ~ age + gender + region) %&gt;% 
+  impute_rhd(formula = hours ~ age + gender + region | employed)
+```
+
+--
+
+
+```r
+lfs_imp %&gt;% count(employed, is.na(hours))
+```
+
+
+
+| employed|is.na(hours) |   n|
+|--------:|:------------|---:|
+|        0|TRUE         | 165|
+|        1|FALSE        | 314|
+|        1|TRUE         |  21|
+
+---
+
+
+```r
+lfs_imp %&gt;% filter(employed==1, age==21)
+```
+
+
+
+|  id| age|gender |region | employed| hours|
+|---:|---:|:------|:------|--------:|-----:|
+|  30|  21|M      |W      |        1|    NA|
+|  79|  21|F      |S      |        1|    40|
+|  97|  21|M      |S      |        1|    40|
+| 265|  21|F      |W      |        1|    40|
+| 357|  21|F      |S      |        1|    31|
+
+--
+
+# No donors in the strata for id = 21
+
+--
+
+# "Easy" solution =&gt; Random donor in 10 year age group
+
+---
+
+# Step 4
+
+
+```r
+lfs_imp &lt;- lfs %&gt;% 
+  impute_proxy(formula = employed ~ hours &gt; 0) %&gt;% 
+  impute_pmm(formula = employed ~ age + gender + region) %&gt;% 
+  impute_rhd(formula = hours ~ age + gender + region | employed) %&gt;% 
+  mutate(age10 = age %/% 10) %&gt;% 
+  impute_rhd(formula = hours ~ age10 | employed) %&gt;% 
+  select(-age10)
+```
+
+--
+
+
+```r
+lfs_imp %&gt;% count(employed, is.na(hours))
+```
+
+
+
+| employed|is.na(hours) |   n|
+|--------:|:------------|---:|
+|        0|TRUE         | 165|
+|        1|FALSE        | 335|
+
+---
+
+# New micro data
+
+
+```r
+lfs_imp %&gt;% anti_join(lfs, by = names(lfs_imp)) %&gt;% slice_sample(n=10)
+```
+
+
+
+|  id| age|gender |region | employed| hours|
+|---:|---:|:------|:------|--------:|-----:|
+| 243|  57|M      |N      |        1|    40|
+| 118|  63|M      |N      |        1|    36|
+| 306|  51|F      |W      |        1|    40|
+| 131|  33|F      |E      |        1|    40|
+|  77|  27|F      |S      |        1|    40|
+|  16|  18|F      |W      |        1|    40|
+| 205|  78|M      |E      |        0|    NA|
+|  38|  50|M      |W      |        1|    40|
+|  14|  46|F      |S      |        1|    26|
+| 271|  66|F      |N      |        1|    40|
+
+---
+
+# Alternative ML solution
+
+
+```r
+lfs_mf &lt;- lfs %&gt;% 
+  mutate(hours = if_else(employed == 0, 0, hours),
+         employed = as.factor(as.character(employed))) %&gt;% 
+  as.data.frame() %&gt;% 
+  impute_mf(formula = . - id ~ . - id) %&gt;% 
+  mutate(employed = as.numeric(as.character(employed)),
+         hours = if_else(hours == 0, NA_real_, hours))
+```
+
+```
+##   missForest iteration 1 in progress...done!
+##   missForest iteration 2 in progress...done!
+##   missForest iteration 3 in progress...done!
+```
+
+```r
+lfs_mf %&gt;% count(employed, is.na(hours))
+```
+
+
+
+| employed|is.na(hours) |   n|
+|--------:|:------------|---:|
+|        0|TRUE         | 156|
+|        1|FALSE        | 344|
+
+---
+class: inverse, center, middle
+
+# Questions?
+## (ressources next slide)
+
+---
+
+# Ressources
+
+EU / MEMOBUST: [Handbook on imputation](https://ec.europa.eu/eurostat/cros/content/imputation_en)
+
+CRAN Task View: [Official Statistics &amp; Survey Methodology](https://cran.r-project.org/web/views/OfficialStatistics.html)
+
+Mark van der loo: [simputation: Simple Imputation](https://CRAN.R-project.org/package=simputation)
+
+RStudio: [Tidyverse collection of R packages](https://www.tidyverse.org/)
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
