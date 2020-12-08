@@ -134,9 +134,16 @@ And can different donors be used for the same observations?
 
 ```{r, echo=FALSE, message=FALSE, fig.height=7, fig.align='center'}
 
-ggplot(data = mtcars, aes(x = wt, y = hp)) +
-  geom_smooth(method = "lm", se = FALSE, size = 2) +
+m <- lm(hp ~ wt, data = mtcars)
+
+x <- mtcars
+x$pred <- predict(m,x)
+
+ggplot(data = x, aes(x = wt, y = hp)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1, color = "lightgrey") +
+  geom_segment(mapping = aes(xend = wt, yend = pred)) +
   geom_point(size = 3) +
+  geom_point(mapping = aes(y = pred), shape = 1, size = 3) +
   theme_minimal() +
   theme(axis.title = element_blank(), axis.text = element_blank())
 ```
@@ -146,8 +153,12 @@ ggplot(data = mtcars, aes(x = wt, y = hp)) +
 # Example: Linear prediction (2/2)
 
 ```{r, echo=FALSE, message=FALSE, fig.height=7, fig.align='center'}
+
+y <- data.frame(wt = 4)
+y$pred <- predict(m,y)
+
 last_plot() +
-  geom_vline(mapping = aes(xintercept = 4), size = 2, colour = "red")
+  geom_vline(mapping = aes(xintercept = 4), size = 1, colour = "red")
 ```
 
 ---
@@ -184,6 +195,24 @@ summary(lfs)
 --
 
 ## Partial non-response!
+
+---
+
+# R Matrix
+
+```{r}
+R <- lfs %>% 
+  mutate(across(-id, ~ negate(is.na)(.) %>% as.numeric()))
+
+head(R)
+```
+
+---
+
+```{r}
+R %>% select(-id) %>% summarise_all(mean)
+```
+
 
 ---
 
@@ -330,6 +359,13 @@ lfs_imp %>% count(employed, is.na(hours))
 ```{r}
 lfs_imp %>% anti_join(lfs, by = names(lfs_imp)) %>% slice_sample(n=10)
 ```
+
+---
+
+```{r}
+summary(lfs_imp)
+```
+
 
 ---
 

@@ -203,6 +203,43 @@ summary(lfs)
 
 ---
 
+# R Matrix
+
+
+```r
+R &lt;- lfs %&gt;% 
+  mutate(across(-id, ~ negate(is.na)(.) %&gt;% as.numeric()))
+
+head(R)
+```
+
+
+
+| id| age| gender| region| employed| hours|
+|--:|---:|------:|------:|--------:|-----:|
+|  1|   1|      1|      1|        1|     1|
+|  2|   1|      1|      1|        1|     0|
+|  3|   1|      1|      1|        0|     0|
+|  4|   1|      1|      1|        1|     1|
+|  5|   1|      1|      1|        1|     1|
+|  6|   1|      1|      1|        1|     0|
+
+---
+
+
+```r
+R %&gt;% select(-id) %&gt;% summarise_all(mean)
+```
+
+
+
+| age| gender| region| employed| hours|
+|---:|------:|------:|--------:|-----:|
+|   1|      1|      1|    0.898| 0.586|
+
+
+---
+
 
 ```r
 lfs %&gt;% count(employed, is.na(hours))
@@ -414,16 +451,35 @@ lfs_imp %&gt;% anti_join(lfs, by = names(lfs_imp)) %&gt;% slice_sample(n=10)
 
 |  id| age|gender |region | employed| hours|
 |---:|---:|:------|:------|--------:|-----:|
-| 402|  60|F      |N      |        1|    40|
-| 187|  49|M      |W      |        1|    40|
-| 166|  48|M      |E      |        1|    40|
-| 247|  32|F      |S      |        1|    40|
-| 153|  32|M      |W      |        1|    39|
+| 388|  33|M      |W      |        1|    40|
+| 258|  43|F      |W      |        1|    40|
+| 188|  54|M      |N      |        1|    40|
+| 447|  68|M      |W      |        1|    40|
+| 223|  31|M      |E      |        1|    22|
 | 437|  41|M      |S      |        1|    40|
-|  82|  85|M      |N      |        1|    40|
-| 443|  43|M      |W      |        1|    40|
-| 112|  35|F      |W      |        1|    40|
-| 127|  38|M      |N      |        1|    40|
+|  58|  65|M      |W      |        1|    34|
+| 419|  48|M      |S      |        1|    40|
+| 114|  86|F      |E      |        0|    NA|
+|  30|  21|M      |W      |        1|    39|
+
+---
+
+
+```r
+summary(lfs_imp)
+```
+
+```
+##        id             age        gender  region     employed        hours      
+##  Min.   :  1.0   Min.   :18.00   F:259   W:164   Min.   :0.00   Min.   :20.00  
+##  1st Qu.:125.8   1st Qu.:34.00   M:241   S:132   1st Qu.:0.00   1st Qu.:39.00  
+##  Median :250.5   Median :47.00           N: 81   Median :1.00   Median :40.00  
+##  Mean   :250.5   Mean   :49.55           E:123   Mean   :0.67   Mean   :37.36  
+##  3rd Qu.:375.2   3rd Qu.:65.00                   3rd Qu.:1.00   3rd Qu.:40.00  
+##  Max.   :500.0   Max.   :90.00                   Max.   :1.00   Max.   :40.00  
+##                                                                 NA's   :165
+```
+
 
 ---
 
@@ -445,6 +501,8 @@ lfs_mf &lt;- lfs %&gt;%
 ##   missForest iteration 2 in progress...done!
 ##   missForest iteration 3 in progress...done!
 ##   missForest iteration 4 in progress...done!
+##   missForest iteration 5 in progress...done!
+##   missForest iteration 6 in progress...done!
 ```
 
 ```r
